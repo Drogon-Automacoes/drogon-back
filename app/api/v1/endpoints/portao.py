@@ -1,12 +1,13 @@
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
-from app.api.deps import get_session, get_current_user
+from app.api.deps import get_current_user, get_session
+from app.models.log import AcaoPortao, LogAcesso
 from app.models.portao import Portao, StatusPortao
-from app.models.usuario import Usuario, TipoPerfil
-from app.models.log import LogAcesso, AcaoPortao
-from app.schemas.portao import PortaoCreate, PortaoRead, PortaoComando
+from app.models.usuario import TipoPerfil, Usuario
+from app.schemas.portao import PortaoComando, PortaoCreate, PortaoRead
 
 router = APIRouter()
 
@@ -15,12 +16,12 @@ router = APIRouter()
 def create_portao(
     portao_in: PortaoCreate,
     session: Session = Depends(get_session),
-    current_user: Usuario = Depends(get_current_user)
+    current_user: Usuario = Depends(get_current_user),
 ):
     if current_user.tipo != TipoPerfil.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Apenas administradores podem cadastrar portões."
+            detail="Apenas administradores podem cadastrar portões.",
         )
 
     portao_data = portao_in.model_dump()
@@ -35,16 +36,17 @@ def create_portao(
 @router.get("/", response_model=List[PortaoRead])
 def list_portoes(
     session: Session = Depends(get_session),
-    current_user: Usuario = Depends(get_current_user)
+    current_user: Usuario = Depends(get_current_user),
 ):
     if current_user.tipo == TipoPerfil.SUPER_ADMIN:
         return session.exec(select(Portao)).all()
-    
+
     if not current_user.condominio_id:
         return []
-        
+
     query = select(Portao).where(Portao.condominio_id == current_user.condominio_id)
     return session.exec(query).all()
+
 
 @router.post("/{portao_id}/acionar", response_model=PortaoRead)
 def acionar_portao(

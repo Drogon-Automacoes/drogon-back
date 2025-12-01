@@ -11,24 +11,13 @@ exclude = '''
 '''
 
 [tool.ruff]
-# Comprimento de linha igual ao do Black
 line-length = 88
 target-version = "py311"
 
-# Regras habilitadas:
-# E: Erros pycodestyle
-# F: Pyflakes (pega variáveis não usadas, imports quebrados)
-# I: Isort (organiza os imports em ordem alfabética)
-# B: Flake8-bugbear (pega bugs comuns)
+[tool.ruff.lint]
 select = ["E", "F", "I", "B"]
 
-# Pastas para ignorar
-exclude = [
-    ".git",
-    ".venv",
-    "__pycache__",
-]
+ignore = ["B008", "F821"]
 
-[tool.ruff.isort]
-# Garante que imports do nosso app fiquem separados de bibliotecas externas
+[tool.ruff.lint.isort]
 known-first-party = ["app"]

@@ -1,23 +1,25 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session, select, col
 
-from app.api.deps import get_session, get_current_user
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session, col, select
+
+from app.api.deps import get_current_user, get_session
 from app.models.log import LogAcesso
-from app.models.usuario import Usuario, TipoPerfil
+from app.models.usuario import TipoPerfil, Usuario
 from app.schemas.log import LogRead
 
 router = APIRouter()
+
 
 @router.get("/", response_model=List[LogRead])
 def read_logs(
     skip: int = 0,
     limit: int = 50,
     session: Session = Depends(get_session),
-    current_user: Usuario = Depends(get_current_user)
+    current_user: Usuario = Depends(get_current_user),
 ):
     if current_user.tipo == TipoPerfil.MORADOR:
-         raise HTTPException(status_code=403, detail="Acesso negado.")
+        raise HTTPException(status_code=403, detail="Acesso negado.")
 
     query = (
         select(LogAcesso, Usuario)
@@ -26,12 +28,12 @@ def read_logs(
         .offset(skip)
         .limit(limit)
     )
-    
+
     if current_user.tipo == TipoPerfil.ADMIN:
         query = query.where(Usuario.condominio_id == current_user.condominio_id)
 
     results = session.exec(query).all()
-    
+
     logs_resposta = []
     for log, usuario in results:
         log_read = LogRead(
@@ -42,8 +44,8 @@ def read_logs(
             acao=log.acao,
             sucesso=log.sucesso,
             observacao=log.observacao,
-            usuario_nome=usuario.nome
+            usuario_nome=usuario.nome,
         )
         logs_resposta.append(log_read)
-        
+
     return logs_resposta

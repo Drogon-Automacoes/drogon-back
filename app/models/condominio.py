@@ -1,6 +1,8 @@
+from typing import List
 from uuid import UUID, uuid4
-from sqlmodel import Field, SQLModel, Relationship
-from typing import List, Optional
+
+from sqlmodel import Field, Relationship, SQLModel
+
 
 class Condominio(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)

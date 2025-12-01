@@ -1,7 +1,8 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
-from typing import Any
 
 from app.api.deps import get_session
 from app.core.security import create_access_token, verify_password
@@ -23,7 +24,11 @@ def login_access_token(
         raise HTTPException(status_code=400, detail="Email ou senha incorretos")
 
     if not usuario.ativo:
-        raise HTTPException(status_code=400, detail="Sua conta foi bloqueada pelo síndico. Entre em contato com a administração.")
+        raise HTTPException(
+            status_code=400,
+            detail="Sua conta foi bloqueada pelo síndico."
+            " Entre em contato com a administração.",
+        )
 
     return {
         "access_token": create_access_token(usuario.id),

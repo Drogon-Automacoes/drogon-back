@@ -1,18 +1,15 @@
 import pytest
-from typing import Generator
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
-from app.main import app
 from app.api.deps import get_session
-from app.models.usuario import Usuario
+from app.main import app
 
 engine = create_engine(
-    "sqlite://", 
-    connect_args={"check_same_thread": False}, 
-    poolclass=StaticPool
+    "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
 )
+
 
 @pytest.fixture(name="session")
 def session_fixture():
@@ -20,6 +17,7 @@ def session_fixture():
     with Session(engine) as session:
         yield session
     SQLModel.metadata.drop_all(engine)
+
 
 @pytest.fixture(name="client")
 def client_fixture(session: Session):
