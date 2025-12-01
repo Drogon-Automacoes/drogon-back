@@ -9,5 +9,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 COPY ./app ./app
+COPY ./scripts ./scripts
 
-CMD ["fastapi", "run", "app/main.py", "--port", "8000", "--host", "0.0.0.0"]
+COPY start.sh .
+RUN chmod +x start.sh
+
